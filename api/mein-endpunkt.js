@@ -1,31 +1,29 @@
 // api/mein-endpunkt.js
 export default async function handler(req, res) {
   try {
-    // Zieladresse – du kannst sie später ändern, falls nötig
     const target = "https://www.kongregate.com";
-
-    // Anfrage an die Zielseite schicken
     const response = await fetch(target, {
       headers: { "User-Agent": "MeinWebServer/1.0" },
     });
 
-    // Inhalt der Antwort lesen
     const contentType = response.headers.get("content-type") || "";
-    let data;
 
     if (contentType.includes("application/json")) {
-      data = await response.json();
-      res.status(200).json({ ok: true, source: data });
+      // Wenn die Seite JSON ist → direkt zurückgeben
+      const data = await response.json();
+      res.status(200).json({ ok: true, type: "json", data });
     } else {
+      // Wenn die Seite HTML/Text ist → in JSON „einbetten“
       const text = await response.text();
-      res
-        .status(200)
-        .send(text.slice(0, 5000)); // nur die ersten 5000 Zeichen anzeigen
+      res.status(200).json({
+        ok: true,
+        type: "html",
+        length: text.length,
+        snippet: text.slice(0, 300), // erste 300 Zeichen
+      });
     }
   } catch (err) {
     console.error("Fehler:", err);
-    res
-      .status(500)
-      .json({ ok: false, error: "Fehler beim Abrufen der Zielseite" });
+    res.status(500).json({ ok: false, error: err.message });
   }
 }
