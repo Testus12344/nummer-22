@@ -1,9 +1,4 @@
-// api/mein-endpunkt.js
 export default async function handler(req, res) {
-  if (req.method !== "GET") {
-    return res.status(405).json({ ok: false, error: "Nur GET erlaubt" });
-  }
-
   try {
     const target = "https://www.kongregate.com";
     const response = await fetch(target, {
